@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>SIGNAL_REFRACTOR_PORTABLE_V1.2</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+    <style>
+      /* ============================================
+         SKEUOMORPHIC HARDWARE UI STYLESHEET (MOBILE-OPTIMIZED)
+         ============================================ */
+      :root {
+        --metal-base: #c5cfd6;
+        --metal-highlight: #e8eef2;
+        --metal-shadow: #8a949c;
+        --metal-dark: #606870;
+        --brushed-metal-base: #b8c2cc;
+        --brushed-metal-highlight: #dde3e8;
+        --brushed-metal-shadow: #889099;
+        --plastic-base: #2a2e33;
+        --plastic-highlight: #3d444b;
+        --plastic-shadow: #1a1d20;
+        --led-red: #ff3333;
+        --led-green: #33ff66;
+        --led-blue: #3366ff;
+        --led-amber: #ffaa33;
+        --light-source-angle: 135deg;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background-color: #0a0c0e;
+        color: #1a1d20;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        touch-action: manipulation;
+      }
+
+      .hardware-ui * {
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .hw-button {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 20px;
+        min-height: 48px; /* Touch target */
+        border: none;
+        border-radius: 4px;
+        background: linear-gradient(var(--light-source-angle), var(--metal-highlight) 0%, var(--metal-base) 45%, var(--metal-shadow) 100%);
+        color: #1a1d20;
+        font-size: 11px;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+        cursor: pointer;
+        box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset, 0 -1px 0 rgba(0, 0, 0, 0.2) inset, 0 4px 8px rgba(0, 0, 0, 0.4);
+        transition: transform 0.05s ease;
+      }
+
+      .hw-button:active, .hw-button.active {
+        background: linear-gradient(var(--light-source-angle), var(--metal-shadow) 0%, var(--metal-base) 55%, var(--metal-highlight) 100%);
+        box-shadow: 0 -1px 0 rgba(255, 255, 255, 0.3) inset, 0 1px 0 rgba(0, 0, 0, 0.4) inset, 0 2px 4px rgba(0, 0, 0, 0.3) inset;
+        transform: translateY(2px);
+      }
+
+      .hw-rack-panel {
+        background: linear-gradient(180deg, var(--brushed-metal-highlight) 0%, var(--brushed-metal-base) 50%, var(--brushed-metal-shadow) 100%);
+        box-shadow: 0 2px 0 rgba(255, 255, 255, 0.3) inset, 0 -2px 0 rgba(0, 0, 0, 0.3) inset;
+        position: relative;
+      }
+
+      .hw-rack-panel::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: repeating-linear-gradient(90deg, transparent 0px, rgba(255, 255, 255, 0.03) 1px, transparent 2px);
+        pointer-events: none;
+      }
+
+      .hw-led {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 30% 30%, #4a4a4a, #2a2a2a 40%, #1a1a1a 100%);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.3) inset;
+      }
+
+      .hw-led.active.red { background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), var(--led-red) 40%, #900 100%); box-shadow: 0 0 12px var(--led-red); }
+      .hw-led.active.green { background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), var(--led-green) 40%, #060 100%); box-shadow: 0 0 12px var(--led-green); }
+      .hw-led.active.amber { background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), var(--led-amber) 40%, #c60 100%); box-shadow: 0 0 12px var(--led-amber); }
+
+      .hw-display-screen {
+        background: linear-gradient(180deg, #0a0f0a 0%, #1a2f1a 100%);
+        border-radius: 2px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.8) inset;
+        position: relative;
+        overflow: hidden;
+      }
+
+      input[type="range"].hw-slider {
+        -webkit-appearance: none;
+        width: 100%;
+        height: 12px; /* Thicker for touch */
+        background: #121417;
+        border-radius: 6px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.8) inset;
+        outline: none;
+        margin: 15px 0;
+      }
+
+      input[type="range"].hw-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 32px; /* Larger for touch */
+        height: 44px;
+        background: linear-gradient(135deg, var(--metal-highlight), var(--metal-base), var(--metal-shadow));
+        border-radius: 3px;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.6), 0 1px 0 rgba(255, 255, 255, 0.5) inset;
+        cursor: grab;
+        border: 1px solid #4a4f55;
+      }
+
+      .hw-rack-screw {
+        width: 16px;
+        height: 16px;
+        background: radial-gradient(circle at 30% 30%, var(--metal-highlight) 0%, var(--metal-base) 50%, var(--metal-dark) 100%);
+        border-radius: 50%;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        position: relative;
+      }
+      .hw-rack-screw::before {
+        content: '';
+        position: absolute;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%) rotate(45deg);
+        width: 12px; height: 2px;
+        background: rgba(0,0,0,0.6);
+      }
+
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+    <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@19.0.0",
+    "react-dom": "https://esm.sh/react-dom@19.0.0",
+    "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
+    "p5": "https://esm.sh/p5@^1.9.0",
+    "gifenc": "https://esm.sh/gifenc@1.0.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/"
+  }
+}
+</script>
+  </head>
+  <body class="hardware-ui">
+    <div id="root"></div>
+    <script type="module" src="index.tsx"></script>
+  </body>
+</html>

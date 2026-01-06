@@ -1,0 +1,7 @@
+{
+  "name": "Refract & Displace Studio",
+  "description": "A high-end GLSL-powered image manipulation tool using p5.js and React. Create complex refraction, flow, and geometric displacement effects in real-time.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
